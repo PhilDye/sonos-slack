@@ -1,0 +1,7 @@
+{
+    "SlackBot": {
+        "name": "SonosBot",
+        "channel": "#nowplaying",
+        "token": ""      // INSERT YOUR SLACK BOT API TOKEN
+    }
+}
