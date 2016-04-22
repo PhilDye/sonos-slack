@@ -1,31 +1,19 @@
 var SlackBot = require('slackbots');
 var Sonos = require('sonos');
 var _ = require('underscore');
+var config = require('config');
 var deviceInfo = require ('./deviceInfo.js');
 
-var devices = []
 
-
- // load user settings
-try {
-  var settings = require('./settings.js');
-} catch (e) {
-  console.log('no settings file found, will only use default settings');
-}
-
-var download = function(uri, filename, callback){
-    request.head(uri, function(err, res, body){
-        request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
-    });
-};
-
-
+var devices = [];
 
 // create a bot 
 var bot = new SlackBot({
-    token: settings.token, // Add a bot https://my.slack.com/services/new/bot and put the token  
-    name: settings.name
+    token: config.get('SlackBot.token'), // Add a bot https://my.slack.com/services/new/bot and put the token  
+    name: config.get('SlackBot.name')
 });
+
+var channel = config.get('SlackBot.channel');
 
 // find Sonos players on the local network
 console.log('Searching for Sonos devices...')
@@ -66,7 +54,7 @@ bot.on('start', function() {
     //var params = {
     //    icon_emoji: ':cat:'
     //};
-    bot.postMessage(settings.channel, '_SonosBot started_'); 
+    bot.postMessage(channel, '_SonosBot started_'); 
 
 });
 
@@ -92,13 +80,13 @@ bot.on('message', function(data) {
         result = result + "*play*: Resume playback in all zones\n";
         result = result + "*devices*: Debugging info about the current players\n";
 
-        bot.postMessage(settings.channel, result); 
+        bot.postMessage(channel, result); 
     }
 
 
     if (data.text.toLowerCase() == "devices") {
         deviceInfo.dumpInfo(devices, function(result) {
-            bot.postMessage(settings.channel, result); 
+            bot.postMessage(channel, result); 
         })
     }
 
@@ -107,7 +95,7 @@ bot.on('message', function(data) {
             var player = new Sonos.Sonos(device.ip);
             player.pause(function (err, paused) {
                 if (!err && paused) {
-                    bot.postMessage(settings.channel, '_' + device.name + ' paused_'); 
+                    bot.postMessage(channel, '_' + device.name + ' paused_'); 
                 }
             });
         })
@@ -118,7 +106,7 @@ bot.on('message', function(data) {
             var player = new Sonos.Sonos(device.ip);
             player.play(function (err, playing) {
             if (!err && playing) {
-                    bot.postMessage(settings.channel, '_' + device.name + ' playing_'); 
+                    bot.postMessage(channel, '_' + device.name + ' playing_'); 
                 }            
             });
         })
@@ -127,7 +115,7 @@ bot.on('message', function(data) {
     if (data.text.toLowerCase().startsWith('skip')) {
         if (devices.length != 1 && data.text.toLowerCase() == 'skip')
         {
-            bot.postMessage(settings.channel, 'Tell me which zone to skip, eg `skip zonename` - use `nowplaying` to get zone names');
+            bot.postMessage(channel, 'Tell me which zone to skip, eg `skip zonename` - use `nowplaying` to get zone names');
             return;
         }
 
@@ -141,7 +129,7 @@ bot.on('message', function(data) {
             var player = new Sonos.Sonos(zone.ip);
             player.next(function (err, skipped) {
                 if (!err && skipped) {
-                    bot.postMessage(settings.channel, '_' + zone.name + ' skipped_'); 
+                    bot.postMessage(channel, '_' + zone.name + ' skipped_'); 
                 }
             });
         }
@@ -153,7 +141,7 @@ bot.on('message', function(data) {
                 var song = result.track.artist + ' - ' + result.track.title;
                 var data = '(' + result.zone + ') ' + '*' + song + '*';
 
-                bot.postMessage(settings.channel, data); 
+                bot.postMessage(channel, data); 
 
                 // get the album art and make it publically accessible
                 // download(result.track.albumArtURL, "./" + song + ".png", function(){

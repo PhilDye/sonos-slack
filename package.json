@@ -6,9 +6,13 @@
     "start": "node server.js"
   },
   "author": "Phil Dye <phil@phildye.org>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PhilDye/sonos-slack.git"
+  },
   "dependencies": {
-    "imgur": "^0.1.7",
-    "request": "^2.72.0",
+    "config": "^1.20.1",
+    "fs": "0.0.2",
     "slackbots": "^0.5.1",
     "sonos": "^0.12.0",
     "underscore": "^1.8.3"
